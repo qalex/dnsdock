@@ -19,7 +19,7 @@ type DockerManager struct {
 }
 
 func NewDockerManager(c *Config, list ServiceListProvider, tlsConfig *tls.Config) (*DockerManager, error) {
-	docker, err := dockerclient.NewDockerClient(c.dockerHost, tlsConfig)
+	docker, err := dockerclient.NewDockerClientVersion("v1.21", c.dockerHost, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
