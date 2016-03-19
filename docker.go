@@ -74,6 +74,10 @@ func (d *DockerManager) getService(id string) (*Service, error) {
 	service.Name = cleanContainerName(inspect.Name)
 	service.Ip = net.ParseIP(inspect.NetworkSettings.IPAddress)
 
+	for network, settings := range inspect.NetworkSettings.Networks {
+		service.NetworkIps[network] = net.ParseIP(settings.IPAddress)
+	}
+
 	service = overrideFromEnv(service, splitEnv(inspect.Config.Env))
 	if service == nil {
 		return nil, errors.New("Skipping " + id)

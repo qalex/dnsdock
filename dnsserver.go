@@ -13,15 +13,17 @@ import (
 )
 
 type Service struct {
-	Name    string
-	Image   string
-	Ip      net.IP
-	Ttl     int
-	Aliases []string
+	Name       string
+	Image      string
+	Ip         net.IP
+	Ttl        int
+	Aliases    []string
+	NetworkIps map[string]net.IP
 }
 
 func NewService() (s *Service) {
 	s = &Service{Ttl: -1}
+	s.NetworkIps = make(map [string]net.IP)
 	return
 }
 
