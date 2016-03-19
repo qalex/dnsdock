@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/samalba/dockerclient"
+	"github.com/tjamet/dockerclient"
 )
 
 type DockerManager struct {
@@ -19,7 +19,7 @@ type DockerManager struct {
 }
 
 func NewDockerManager(c *Config, list ServiceListProvider, tlsConfig *tls.Config) (*DockerManager, error) {
-	docker, err := dockerclient.NewDockerClient(c.dockerHost, tlsConfig)
+	docker, err := dockerclient.NewDockerClientVersion("v1.21", c.dockerHost, tlsConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +74,10 @@ func (d *DockerManager) getService(id string) (*Service, error) {
 	service.Name = cleanContainerName(inspect.Name)
 	service.Ip = net.ParseIP(inspect.NetworkSettings.IPAddress)
 
+	for network, settings := range inspect.NetworkSettings.Networks {
+		service.NetworkIps[network] = net.ParseIP(settings.IPAddress)
+	}
+
 	service = overrideFromEnv(service, splitEnv(inspect.Config.Env))
 	if service == nil {
 		return nil, errors.New("Skipping " + id)
@@ -88,15 +92,15 @@ func (d *DockerManager) eventCallback(event *dockerclient.Event, ec chan error, 
 	switch event.Status {
 	case "die", "stop", "kill":
 		// Errors can be ignored here because there can be no-op events.
-		d.list.RemoveService(event.Id)
+		d.list.RemoveService(event.ID)
 	case "start", "restart":
-		service, err := d.getService(event.Id)
+		service, err := d.getService(event.ID)
 		if err != nil {
 			ec <- err
 			return
 		}
 
-		d.list.AddService(event.Id, *service)
+		d.list.AddService(event.ID, *service)
 	}
 }
 

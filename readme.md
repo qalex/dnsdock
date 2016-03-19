@@ -44,9 +44,10 @@ containers. If a DNS request matches some of the containers their local IP
 addresses are returned.
 
 Format for a request matching a container is:
-`<anything>.<container-name>.<image-name>.<environment>.<domain>`.
+`<anything>.<container-name>.<image-name>.<network>.<environment>.<domain>`.
 
 - `environment` and `domain` are static suffixes that are set on startup. Defaults to `docker`.
+- `network` is the name of the network the container is attached to.
 - `image-name` is last part of the image tag used when starting the container.
 - `container-name` alphanumerical part of container name.
 
