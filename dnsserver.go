@@ -129,18 +129,27 @@ func (s *DNSServer) GetAllServices() map[string]Service {
 	return list
 }
 
+func (s *DNSServer) addServiceToChannel(service *Service, c chan string, domain string) {
+	if service.Image == "" {
+		c <- service.Name + "." + domain
+	} else {
+		domain = service.Image + "." + domain
+
+		c <- domain
+		c <- service.Name + "." + domain
+	}
+}
+
 func (s *DNSServer) listDomains(service *Service) chan string {
 	c := make(chan string)
 
 	go func() {
+		domain := s.config.domain.String() + "."
 
-		if service.Image == "" {
-			c <- service.Name + "." + s.config.domain.String() + "."
-		} else {
-			domain := service.Image + "." + s.config.domain.String() + "."
+		s.addServiceToChannel(service, c, domain)
 
-			c <- domain
-			c <- service.Name + "." + domain
+		for network, _ := range service.NetworkIps {
+			s.addServiceToChannel(service, c, network + "." + domain)
 		}
 
 		for _, alias := range service.Aliases {
@@ -335,8 +344,20 @@ func (s *DNSServer) queryIp(query string) chan *Service {
 		s.lock.RLock()
 
 		for _, service := range s.services {
+			found := false
 			if service.Ip.String() == ip {
+				found = true
+			} else {
+				for _, network_ip := range service.NetworkIps {
+					if network_ip.String() == ip {
+						found = true
+						break
+					}
+				}
+			}
+			if found {
 				c <- service
+
 			}
 		}
 
@@ -365,6 +386,19 @@ func (s *DNSServer) queryServices(query string) chan *Service {
 
 			if len(service.Image) > 0 {
 				test = append(test, strings.Split(service.Image, ".")...)
+			}
+
+			for network, networkIp := range service.NetworkIps {
+				network_test := append(test, strings.Split(network, ".")...)
+				network_test = append(network_test, s.config.domain...)
+				if isPrefixQuery(query, network_test) {
+					network_service := &Service{}
+					*network_service = *service
+					network_service.Ip = networkIp
+
+					c <- network_service
+
+				}
 			}
 
 			test = append(test, s.config.domain...)
