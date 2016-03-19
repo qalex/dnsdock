@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/samalba/dockerclient"
+	"github.com/tjamet/dockerclient"
 )
 
 type DockerManager struct {

@@ -20,8 +20,8 @@
 			"Rev": "3e549e2f6fd420cdffa528144b925305401bf55c"
 		},
 		{
-			"ImportPath": "github.com/samalba/dockerclient",
-			"Rev": "f274bbd0e2eb35ad1444dc6e6660214f9fbbc08c"
+			"ImportPath": "github.com/tjamet/dockerclient",
+			"Rev": "c96429b409aa042dcf5c2b837420e31f01ac5a94"
 		},
 		{
 			"ImportPath": "github.com/docker/go-units",
