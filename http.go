@@ -38,10 +38,14 @@ func (s *HTTPServer) Start() error {
 }
 
 func (s *HTTPServer) getServices(w http.ResponseWriter, req *http.Request) {
-	if err := json.NewEncoder(w).Encode(s.list.GetAllServices()); err != nil {
+	js, err := json.MarshalIndent(s.list.GetAllServices(), "", "  ")
+	if err != nil {
 		log.Println("Error encoding: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+	
+	w.Write(js)
 }
 
 func (s *HTTPServer) getService(w http.ResponseWriter, req *http.Request) {
