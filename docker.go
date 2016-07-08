@@ -74,8 +74,11 @@ func (d *DockerManager) getService(id string) (*Service, error) {
 	service.Name = cleanContainerName(inspect.Name)
 	service.Ip = net.ParseIP(inspect.NetworkSettings.IPAddress)
 
+	fqdn := service.Name + "." + service.Image + "."
+	
 	for network, settings := range inspect.NetworkSettings.Networks {
 		service.NetworkIps[network] = net.ParseIP(settings.IPAddress)
+		service.FQDNs = append(service.FQDNs, fqdn + network + ".docker")
 	}
 
 	service = overrideFromLabels(service, inspect.Config.Labels)

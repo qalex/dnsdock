@@ -19,11 +19,13 @@ type Service struct {
 	Ttl        int
 	Aliases    []string
 	NetworkIps map[string]net.IP
+	FQDNs       []string
 }
 
 func NewService() (s *Service) {
 	s = &Service{Ttl: -1}
 	s.NetworkIps = make(map [string]net.IP)
+	s.FQDNs = make([]string, 0)
 	return
 }
 
